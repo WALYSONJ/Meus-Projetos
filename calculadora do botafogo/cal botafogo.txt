@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora do Botafogo</title>
+    <style>
+        :root{ --panel: rgba(0,0,0,0.28); }
+        html,body{ height:100%; margin:0; }
+        body{
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            display:flex; align-items:center; justify-content:center;
+            position:relative; min-height:100vh;
+            background-color:#000;
+            background-image: url('./Torcida-Botafogo.webp');
+            background-size: cover; background-position: center;
+        }
+        .calc{
+            width:340px; max-width:90%; background: var(--panel); color:#fff; padding:18px; border-radius:12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            position:relative; z-index:1;
+        }
+        body::before{
+            content: '';
+            position:fixed; inset:0; z-index:0;
+            background: rgba(0,0,0,0.25);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+        }
+        .title{ text-align:center; font-weight:700; margin-bottom:8px; }
+        .display{
+            background: rgba(255,255,255,0.06); height:64px; border-radius:8px; padding:10px 14px;
+            font-size:28px; display:flex; align-items:center; justify-content:flex-end; overflow:hidden;
+        }
+        .buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-top:14px; }
+        button{
+            font-size:18px; padding:14px; border-radius:999px; border:0; background: rgba(255,255,255,0.06); color:#fff;
+            cursor:pointer; user-select:none; transition: transform .08s ease, filter .12s ease;
+        }
+        button:active{ transform: translateY(1px) scale(.998); }
+        button:hover{ filter:brightness(1.08); }
+            button.operator{ background: transparent; color:#fff; font-weight:600; border-color: rgba(255,255,255,0.12); }
+        button.equal{ background: transparent; color:#fff; grid-column: span 2; font-weight:700; }
+        button.clear{ background: transparent; color:#fff; }
+    </style>
+</head>
+<body>
+    <div class="calc">
+        <div class="title">Calculadora do Botafogo</div>
+        <div id="display" class="display">0</div>
+        <div class="buttons">
+            <button data-val="C" class="clear">C</button>
+            <button data-val="←">←</button>
+            <button data-val="%" class="operator">%</button>
+            <button data-val="/" class="operator">÷</button>
+
+            <button data-val="7">7</button>
+            <button data-val="8">8</button>
+            <button data-val="9">9</button>
+            <button data-val="*" class="operator">×</button>
+
+            <button data-val="4">4</button>
+            <button data-val="5">5</button>
+            <button data-val="6">6</button>
+            <button data-val="-" class="operator">−</button>
+
+            <button data-val="1">1</button>
+            <button data-val="2">2</button>
+            <button data-val="3">3</button>
+            <button data-val="+" class="operator">+</button>
+
+            <button data-val="0" style="grid-column: span 2;">0</button>
+            <button data-val=".">.</button>
+            <button data-val="=" class="equal">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        let expr = '';
+
+        function update(){ display.textContent = expr || '0'; }
+
+        function safeEval(s){
+            // substitui sinais visuais por operadores JS
+            try{
+                const sanitized = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+                // Evita caracteres inesperados
+                if(/[^0-9.+\-*/()% ]/.test(sanitized)) return 'Erro';
+                // eslint-disable-next-line no-eval
+                const res = eval(sanitized);
+                return (res === Infinity || Number.isNaN(res)) ? 'Erro' : String(res);
+            }catch(e){ return 'Erro'; }
+        }
+
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const v = btn.dataset.val;
+                if(v === 'C'){ expr = ''; update(); return; }
+                if(v === '←'){ expr = expr.slice(0,-1); update(); return; }
+                if(v === '='){ expr = safeEval(expr); update(); return; }
+                expr += v;
+                update();
+            });
+        });
+    </script>
+</body>
+</html>
